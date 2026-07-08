@@ -35,7 +35,8 @@ Boot disk: 300 GB balanced persistent disk
 GPU: none
 External IP: static
 Network: default VPC
-Firewall: no broad app ports opened initially
+Network tag: nammayatri-dev-api
+Firewall: tcp:8013, tcp:8016, and tcp:9090 open for dev app API access
 Purpose label: nammayatri-dev
 Owner label: ms4n
 Project label: keystone-store
@@ -58,6 +59,35 @@ Region: asia-south1
 This IP is intended for dev app/backend configuration where a stable backend address is needed.
 
 Prefer the SSH alias for shell access, but use the static IP for Android app API configuration when required.
+
+Recommended public dev API targets for Android:
+
+```text
+Rider app backend:  http://34.47.150.106:9090/rider-app
+Driver app backend: http://34.47.150.106:9090/dynamic-offer-driver-app
+```
+
+The generated Caddy reverse proxy listens on `0.0.0.0:9090` and strips those path prefixes before forwarding to the local services. This avoids depending on every service binding directly to the public network interface.
+
+Direct dev service ports are also allowed for testing:
+
+```text
+Rider app direct port:  http://34.47.150.106:8013
+Driver app direct port: http://34.47.150.106:8016
+```
+
+Direct ports work only when the matching service binds to a non-loopback interface. Prefer the Caddy URLs above for Android config.
+
+All endpoints work only while the VM is running and the matching NammaYatri services are healthy.
+
+Firewall rule for the dev API ports:
+
+```text
+Rule name: allow-nammayatri-dev-api
+Target tag: nammayatri-dev-api
+Allowed ports: tcp:8013,tcp:8016,tcp:9090
+Source range: 0.0.0.0/0
+```
 
 ## Schedule
 
@@ -98,6 +128,14 @@ gcloud compute addresses describe keystone-nammayatri-dev-ip \
   --project keystone-7892 \
   --region asia-south1 \
   --format='table(name,address,status,users.basename())'
+```
+
+Check the dev API firewall rule:
+
+```bash
+gcloud compute firewall-rules describe allow-nammayatri-dev-api \
+  --project keystone-7892 \
+  --format='table(name,direction,allowed[].map().firewall_rule().list(),sourceRanges.list(),targetTags.list())'
 ```
 
 Start the VM manually:
@@ -222,9 +260,45 @@ gcloud compute resource-policies update instance-schedule keystone-nammayatri-de
   --timezone='Asia/Kolkata'
 ```
 
+Dev API firewall:
+
+```bash
+gcloud compute instances add-tags keystone-nammayatri-dev \
+  --project keystone-7892 \
+  --zone asia-south1-c \
+  --tags nammayatri-dev-api
+
+gcloud compute firewall-rules create allow-nammayatri-dev-api \
+  --project keystone-7892 \
+  --network default \
+  --direction INGRESS \
+  --priority 1000 \
+  --action ALLOW \
+  --rules tcp:8013,tcp:8016,tcp:9090 \
+  --source-ranges 0.0.0.0/0 \
+  --target-tags nammayatri-dev-api
+```
+
+The firewall rule was later updated to include the generated Caddy reverse proxy port:
+
+```bash
+gcloud compute firewall-rules update allow-nammayatri-dev-api \
+  --project keystone-7892 \
+  --rules tcp:8013,tcp:8016,tcp:9090
+```
+
 ## GitHub And Repository Setup
 
-Local repository remotes:
+Local repository remotes on this laptop:
+
+```text
+origin   -> git@github-personal:keystone-commerce/nammayatri.git
+upstream -> git@github.com:nammayatri/nammayatri.git
+```
+
+The `github-personal` host alias is used locally so pushes authenticate as `ms4n`.
+
+Repository remotes on the VM:
 
 ```text
 origin   -> git@github.com:keystone-commerce/nammayatri.git
@@ -410,14 +484,118 @@ direnv allow
 
 Backend setup is expected to use the repo's Nix/direnv flow.
 
-Common backend commands from `Backend/`:
+The VM has Nix daemon mode, Docker, Docker Compose v2, `direnv`, `tmux`, GitHub SSH, and the Keystone branch clone installed.
+
+Common backend commands from the repo root:
+
+```bash
+, run-generator
+, run-mobility-stack-dev
+```
+
+Build commands from `Backend/`:
 
 ```bash
 cd Backend
 cabal build all
-, run-generator
-, run-mobility-stack-dev
 ```
+
+Start the dev stack in `tmux`:
+
+```bash
+ssh keystone-nammayatri-dev.asia-south1-c.keystone-7892
+cd ~/dev/keystone/nammayatri
+tmux new-session -d -s ny-stack ". /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh && direnv exec . bash -lc ', run-mobility-stack-dev' 2>&1 | tee ~/ny-stack.log"
+```
+
+Watch the stack log:
+
+```bash
+tail -f ~/ny-stack.log
+```
+
+Attach to the running stack session:
+
+```bash
+tmux attach -t ny-stack
+```
+
+Stop the stack session:
+
+```bash
+tmux kill-session -t ny-stack
+```
+
+Check whether the app ports are listening on the VM:
+
+```bash
+ss -ltnp | egrep ':(8013|8016|9090)'
+```
+
+Check from the local machine whether the public ports are reachable:
+
+```bash
+nc -vz 34.47.150.106 9090
+nc -vz 34.47.150.106 8013
+nc -vz 34.47.150.106 8016
+```
+
+Check Caddy health from the local machine:
+
+```bash
+curl -i http://34.47.150.106:9090/__caddy_health
+```
+
+Check app health through the public reverse proxy:
+
+```bash
+curl -i http://34.47.150.106:9090/rider-app/v2
+curl -i http://34.47.150.106:9090/dynamic-offer-driver-app/ui
+```
+
+Expected healthy responses:
+
+```text
+HTTP/1.1 200 OK
+"Healthy"
+```
+
+Driver app port layout:
+
+```text
+8016 = generated driver Caddy proxy
+8116 = dynamic-offer-driver-app internal service port
+9090 = generated public Caddy reverse proxy for Android-facing paths
+```
+
+If the stack is running but `dynamic-offer-driver-app-exe` has failed and the rest of the dependencies are healthy, restart only the driver app in a separate tmux session:
+
+```bash
+tmux kill-session -t ny-driver 2>/dev/null || true
+
+tmux new-session -d -s ny-driver \
+  "cd ~/dev/keystone/nammayatri && \
+   . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh && \
+   direnv exec . bash -lc 'cd Backend && \
+     SERVICE_PORT=8116 \
+     METRICS_PORT=9997 \
+     RIDER_APP_PORT=8013 \
+     DRIVER_APP_PORT=8016 \
+     LC_ALL=C.UTF-8 \
+     LANG=C.UTF-8 \
+     LC_CTYPE=C.UTF-8 \
+     LOCALE_ARCHIVE=/usr/lib/locale/locale-archive \
+     cabal run dynamic-offer-driver-app:exe:dynamic-offer-driver-app-exe' \
+   2>&1 | tee ~/ny-driver.log"
+```
+
+Watch the driver log:
+
+```bash
+tail -f ~/ny-driver.log
+```
+
+One startup issue found on this VM was a non-ASCII dash in `Backend/dev/ddl-migrations/dynamic-offer-driver-app/0838-additional-ticket-ids.sql`. The driver app migration reader failed with `invalid byte sequence` when that file was read under the process locale. Keep SQL migrations ASCII-only unless the runtime path is known to handle UTF-8 correctly.
 
 For this repo, generated files under `src-read-only/` should not be manually edited. They should come from NammaDSL generation.
 
