@@ -514,6 +514,20 @@ Watch the stack log:
 tail -f ~/ny-stack.log
 ```
 
+After the SQL migration encoding fix in `0838-additional-ticket-ids.sql`, the clean stack start path is:
+
+```text
+ny-stack -> run-mobility-stack-dev -> process-compose -> rider + driver + dashboards + schedulers
+```
+
+The process-compose header can show fewer than `52/52` processes even when the usable backend stack is healthy. Some entries are disabled test helpers, skipped helpers, or one-shot initialization/build processes that complete and exit. Treat the health checks below and absence of `ERR` / `exit_code=1` log lines as the practical readiness signal for Android backend development.
+
+Check for startup errors:
+
+```bash
+grep -E 'ERR|exit_code=1|aborted|invalid byte sequence|Address already in use|Error:' ~/ny-stack.log
+```
+
 Attach to the running stack session:
 
 ```bash
@@ -559,6 +573,16 @@ Expected healthy responses:
 HTTP/1.1 200 OK
 "Healthy"
 ```
+
+The Android-facing ports should stay stable:
+
+```text
+9090 = public reverse proxy
+8013 = rider app direct service port
+8016 = driver app generated proxy port
+```
+
+The stack may reassign non-public auxiliary ports during pre-flight if a stale process is holding them, and it writes those changes to `data/ports-resolved.nix`. Do not use those auxiliary ports in Android config.
 
 Driver app port layout:
 
