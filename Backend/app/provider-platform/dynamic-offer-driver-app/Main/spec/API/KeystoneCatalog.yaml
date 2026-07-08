@@ -1,0 +1,88 @@
+imports: {}
+
+module: KeystoneCatalog
+
+types:
+  KeystoneProduct:
+    id: Text
+    name: Text
+    slug: Text
+    description: Text
+    brand: Text
+    sku: Text
+    categoryId: Text
+    defaultMrp: Text
+    defaultSellingPrice: Text
+    image: Text
+    images: "[Text]"
+    features: "[Text]"
+
+  KeystoneCategory:
+    id: Text
+    name: Text
+    slug: Text
+
+  KeystoneProductDetail:
+    id: Text
+    name: Text
+    slug: Text
+    brand: Text
+    sku: Text
+    categoryId: Text
+    defaultMrp: Text
+    defaultSellingPrice: Text
+    description: Text
+    images: "[Text]"
+    features: "[Text]"
+
+  KeystoneProductListRes:
+    products: "[KeystoneProduct]"
+
+  KeystoneCategoryListRes:
+    categories: "[KeystoneCategory]"
+
+  KeystoneProductDetailRes:
+    productDetail: KeystoneProductDetail
+
+  KeystoneSearchRes:
+    products: "[KeystoneProduct]"
+    categories: "[KeystoneCategory]"
+
+apis:
+  - GET:
+      endpoint: /driver/keystone/categories
+      auth: TokenAuth PROVIDER_TYPE
+      response:
+        type: KeystoneCategoryListRes
+
+  - GET:
+      endpoint: /driver/keystone/products
+      auth: TokenAuth PROVIDER_TYPE
+      query:
+        - page: Int
+        - limit: Int
+        - search: Text
+        - categoryId: Text
+        - brand: Text
+        - sortBy: Text
+        - sortOrder: Text
+      response:
+        type: KeystoneProductListRes
+
+  - GET:
+      endpoint: /driver/keystone/product/{slug}
+      auth: TokenAuth PROVIDER_TYPE
+      params:
+        slug: Text
+      response:
+        type: KeystoneProductDetailRes
+
+  - GET:
+      endpoint: /driver/keystone/search
+      auth: TokenAuth PROVIDER_TYPE
+      query:
+        - q: Text
+        - searchType: Text
+        - limit: Int
+      response:
+        type: KeystoneSearchRes

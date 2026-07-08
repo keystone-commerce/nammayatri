@@ -204,6 +204,47 @@ customError _ =  { code : 400
   , responseHeaders : empty
   }
 
+--------------------------------- keystone catalog ---------------------------------------------------------------------------------------------------------------------------------
+
+fetchKeystoneProductsBT :: String -> String -> Int -> Int -> FlowBT String ST.KeystoneCatalogResult
+fetchKeystoneProductsBT search categoryId page limit = do
+    headers <- getHeaders' "" true
+    withAPIResultBT (EP.keystoneProducts search categoryId page limit) toResult errorHandler (lift $ lift $ callAPI headers (KeystoneProductsReq search categoryId page limit))
+  where
+    toResult (KeystoneProductListRes res) = { isSuccess : true, error : "", products : res.products }
+    errorHandler (ErrorPayload errorPayload) = pure { isSuccess : false, error : decodeErrorMessage errorPayload.response.errorMessage, products : [] }
+
+fetchKeystoneCategoriesBT :: FlowBT String ST.KeystoneCategoryResult
+fetchKeystoneCategoriesBT = do
+    headers <- getHeaders' "" true
+    withAPIResultBT (EP.keystoneCategories "") toResult errorHandler (lift $ lift $ callAPI headers (KeystoneCategoriesReq ""))
+  where
+    toResult (KeystoneCategoryListRes res) = { isSuccess : true, error : "", categories : res.categories }
+    errorHandler (ErrorPayload errorPayload) = pure { isSuccess : false, error : decodeErrorMessage errorPayload.response.errorMessage, categories : [] }
+
+fetchKeystoneProductBySlugBT :: String -> FlowBT String ST.KeystoneProductDetailResult
+fetchKeystoneProductBySlugBT slug = do
+    headers <- getHeaders' "" true
+    withAPIResultBT (EP.keystoneProductDetail slug) toResult errorHandler (lift $ lift $ callAPI headers (KeystoneProductDetailReq slug))
+  where
+    toResult (KeystoneProductDetailRes res) = { isSuccess : true, error : "", product : res.productDetail }
+    errorHandler (ErrorPayload errorPayload) = pure { isSuccess : false, error : decodeErrorMessage errorPayload.response.errorMessage, product : emptyKeystoneProductDetail }
+
+emptyKeystoneProductDetail :: ST.KeystoneProductDetail
+emptyKeystoneProductDetail =
+  { id : ""
+  , name : ""
+  , slug : ""
+  , brand : ""
+  , sku : ""
+  , categoryId : ""
+  , defaultMrp : ""
+  , defaultSellingPrice : ""
+  , description : ""
+  , images : []
+  , features : []
+  }
+
 --------------------------------- triggerOTPBT---------------------------------------------------------------------------------------------------------------------------------
 triggerOTPBT :: TriggerOTPReq → FlowBT String TriggerOTPResp
 triggerOTPBT payload = do

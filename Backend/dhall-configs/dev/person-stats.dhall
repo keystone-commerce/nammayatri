@@ -109,6 +109,7 @@ let cacConfig =
 let inMemConfig = { enableInMem = False, maxInMemSize = +100000000 }
 
 in  { hedisCfg
+    , ltsRedisCfg = hedisCfg
     , hedisClusterCfg
     , hedisNonCriticalCfg = hedisCfg
     , hedisNonCriticalClusterCfg = hedisClusterCfg

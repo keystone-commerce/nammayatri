@@ -51,6 +51,8 @@ initData = {
         , payoutVpa : Nothing
         , payoutRewardAmount : Nothing
         , nyClubTag : Nothing
+        , keystoneProducts : []
+        , keystoneCatalogError : Nothing
         },
     props : {
       showDriverReferralQRCode : false,
@@ -63,6 +65,7 @@ initData = {
       bannerLength : 0,
       glBannerClickable : true,
       nammaClubEnabled : false,
-      nyClubConsent : Nothing
+      nyClubConsent : Nothing,
+      isKeystoneCatalogLoading : true
     }
 }

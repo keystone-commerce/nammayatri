@@ -310,6 +310,7 @@ library
       Domain.Action.UI.FRFSFleetOperator
       Domain.Action.UI.Insurance
       Domain.Action.UI.Invoice
+      Domain.Action.UI.KeystoneCatalog
       Domain.Action.UI.KioskLocation
       Domain.Action.UI.LeaderBoard
       Domain.Action.UI.LmsModule
@@ -522,6 +523,9 @@ library
       SharedLogic.DriverPool.Types
       SharedLogic.DynamicPricing
       SharedLogic.EventTracking
+      SharedLogic.External.KeystoneCommerce.API
+      SharedLogic.External.KeystoneCommerce.Flow
+      SharedLogic.External.KeystoneCommerce.Types
       SharedLogic.External.LocationTrackingService.API.DriverBlockTill
       SharedLogic.External.LocationTrackingService.API.DriverLocation
       SharedLogic.External.LocationTrackingService.API.DriversLocation
@@ -1032,6 +1036,7 @@ library
       API.Action.UI.FRFSFleetOperator
       API.Action.UI.Insurance
       API.Action.UI.Invoice
+      API.Action.UI.KeystoneCatalog
       API.Action.UI.LmsModule
       API.Action.UI.Merchant
       API.Action.UI.MerchantDocument
@@ -1110,6 +1115,7 @@ library
       API.Types.UI.FRFSFleetOperator
       API.Types.UI.Insurance
       API.Types.UI.Invoice
+      API.Types.UI.KeystoneCatalog
       API.Types.UI.LmsModule
       API.Types.UI.Merchant
       API.Types.UI.MerchantDocument

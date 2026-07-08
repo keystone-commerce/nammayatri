@@ -98,6 +98,9 @@ screen initialState =
                   Right modules -> liftFlow $ push $ UpdateModuleList modules
                   Left err -> liftFlow $ push $ UpdateModuleListErrorOccurred
             void $ launchAff $ EHC.flowRunner defaultGlobalState $ computeListItem push
+            void $ launchAff $ flowRunner defaultGlobalState $ runExceptT $ runBackT do
+              catalogResult <- Remote.fetchKeystoneProductsBT "" "" 1 8
+              lift $ lift $ doAff do liftEffect $ push $ UpdateKeystoneCatalog catalogResult
             pure $ pure unit
         )
       ]
@@ -174,10 +177,136 @@ referralScreenInnerBody push state =
       , orientation VERTICAL
       ][ if shouldShowReferral state then driverReferralCode push state else dummyView
       , if gullakRemoteConfig.enabled then savingWithGullak push state gullakRemoteConfig.image else dummyView
+      , keystoneStorefrontView push state
       , rideLeaderBoardView push state
       ]
     , learnAndEarnShimmerView push state
   ] <> if not (null state.data.moduleList.completed) || not (null state.data.moduleList.remaining) then [learnAndEarnView push state] else [])
+
+keystoneStorefrontView :: forall w. (Action -> Effect Unit) -> BenefitsScreenState -> PrestoDOM (Effect Unit) w
+keystoneStorefrontView push state =
+  linearLayout
+    [ height WRAP_CONTENT
+    , width MATCH_PARENT
+    , orientation VERTICAL
+    , margin $ MarginBottom 12
+    , padding $ Padding 14 14 14 14
+    , background Color.white900
+    , cornerRadius 12.0
+    , stroke $ "1," <> Color.grey900
+    , onClick push $ const GoToKeystoneStorefront
+    ]
+    [ linearLayout
+        [ height WRAP_CONTENT
+        , width MATCH_PARENT
+        , orientation HORIZONTAL
+        , gravity CENTER_VERTICAL
+        ]
+        [ linearLayout
+            [ height WRAP_CONTENT
+            , width MATCH_PARENT
+            , weight 1.0
+            , orientation VERTICAL
+            ]
+            [ textView
+                $ [ text "Keystone Store"
+                  , color Color.black800
+                  ]
+                <> FontStyle.h2 TypoGraphy
+            , textView
+                $ [ text "Wholesale products for driver partners"
+                  , color Color.black700
+                  , margin $ MarginTop 3
+                  ]
+                <> FontStyle.body3 TypoGraphy
+            ]
+        , imageView
+            [ height $ V 32
+            , width $ V 32
+            , imageWithFallback $ HU.fetchImage HU.COMMON_ASSET "ny_ic_arrow_right_grey"
+            ]
+        ]
+    , if state.props.isKeystoneCatalogLoading then keystoneStatusText "Loading catalog..." Color.black700
+      else case state.data.keystoneCatalogError of
+        Just err -> keystoneStatusText err Color.red
+        Nothing ->
+          if DA.null state.data.keystoneProducts then keystoneStatusText "No products available right now." Color.black700
+          else horizontalScrollView
+            [ height WRAP_CONTENT
+            , width MATCH_PARENT
+            , scrollBarX false
+            , margin $ MarginTop 12
+            ]
+            [ linearLayout
+                [ height WRAP_CONTENT
+                , width WRAP_CONTENT
+                , orientation HORIZONTAL
+                ]
+                (map keystoneProductCard (DA.take 8 state.data.keystoneProducts))
+            ]
+    ]
+
+keystoneStatusText :: forall w. String -> String -> PrestoDOM (Effect Unit) w
+keystoneStatusText message textColor =
+  textView
+    $ [ text message
+      , color textColor
+      , margin $ MarginTop 12
+      , singleLine false
+      ]
+    <> FontStyle.body3 TypoGraphy
+
+keystoneProductCard :: forall w. KeystoneProduct -> PrestoDOM (Effect Unit) w
+keystoneProductCard product =
+  linearLayout
+    [ height WRAP_CONTENT
+    , width $ V 164
+    , orientation VERTICAL
+    , margin $ MarginRight 12
+    , background Color.grey700
+    , cornerRadius 10.0
+    , padding $ Padding 10 10 10 10
+    ]
+    [ imageView
+        [ width MATCH_PARENT
+        , height $ V 108
+        , cornerRadius 8.0
+        , imageWithFallback $ "," <> product.image
+        ]
+    , textView
+        $ [ text product.name
+          , color Color.black800
+          , margin $ MarginTop 8
+          , maxLines 2
+          ]
+        <> FontStyle.body1 TypoGraphy
+    , textView
+        $ [ text product.brand
+          , color Color.black700
+          , margin $ MarginTop 4
+          , singleLine true
+          ]
+        <> FontStyle.body3 TypoGraphy
+    , linearLayout
+        [ height WRAP_CONTENT
+        , width MATCH_PARENT
+        , orientation HORIZONTAL
+        , gravity CENTER_VERTICAL
+        , margin $ MarginTop 8
+        ]
+        [ textView
+            $ [ text $ "Rs. " <> product.defaultSellingPrice
+              , color Color.black800
+              , weight 1.0
+              ]
+            <> FontStyle.subHeading1 TypoGraphy
+        , textView
+            $ [ text $ "MRP " <> product.defaultMrp
+              , color Color.black700
+              ]
+            <> FontStyle.body4 TypoGraphy
+        ]
+    ]
 
 referralStatsView :: forall w. (Action -> Effect Unit) -> BenefitsScreenState -> PrestoDOM (Effect Unit) w
 referralStatsView push state =

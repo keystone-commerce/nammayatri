@@ -46,3 +46,6 @@ benefitsScreen = do
     GoToDriverClaimRewardScreen updatedState -> do
       modifyScreenState $ BenefitsScreenStateType (\_ -> updatedState)
       App.BackT $ App.BackPoint <$> (pure $ GO_TO_DRIVER_CLAIM_REWARD_SCREEN updatedState)
+    GoToKeystoneStorefrontScreen updatedState -> do
+      modifyScreenState $ BenefitsScreenStateType (\_ -> updatedState)
+      App.BackT $ App.BackPoint <$> (pure $ GO_TO_KEYSTONE_STOREFRONT updatedState)

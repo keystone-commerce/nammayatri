@@ -493,6 +493,24 @@ _:
           '';
         };
 
+        run-driver-stack-dev = {
+          category = "Backend";
+          description = ''
+            Run the local rider + driver backend stack via "cabal run".
+          '';
+          exec = ''
+            export DEV=1
+            echo "── Pre-flight: freeing service ports ──"
+            ${killSvcPortsScript}
+            _hard=$(ulimit -Hs 2>/dev/null || true)
+            if [ -n "$_hard" ] && [ "$_hard" != "unlimited" ]; then
+              ulimit -s "$_hard" 2>/dev/null || true
+              ulimit -n "$_hard" 2>/dev/null || true
+            fi
+            nix --accept-flake-config run .#run-driver-stack-dev -- -t=false -S NAME "$@"
+          '';
+        };
+
         run-mobility-stack-full = {
           category = "Backend";
           description = "Run the FULL nammayatri stack in one terminal: backend + test-context-api + mock-server + test-local-api + test-dashboard.";

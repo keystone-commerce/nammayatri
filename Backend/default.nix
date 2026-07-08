@@ -5,6 +5,7 @@
     ./nix/docker.nix
     ./nix/scripts.nix
     ./nix/run-mobility-stack.nix
+    ./nix/run-driver-stack.nix
     ./nix/arion-configuration.nix
     ./nix/osrm.nix
     ./load-test
@@ -24,6 +25,7 @@
         "load-test-prepare"
         "osrm-server"
         "osrm-data"
+        "run-driver-stack-dev"
         "run-mobility-stack-dev"
         "run-mobility-stack-nix"
       ];

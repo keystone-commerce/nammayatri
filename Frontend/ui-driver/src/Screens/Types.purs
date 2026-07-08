@@ -3028,6 +3028,8 @@ type BenefitsScreenData = {
   , payoutVpa :: Maybe String
   , payoutRewardAmount :: Maybe Int
   , nyClubTag :: Maybe String
+  , keystoneProducts :: Array KeystoneProduct
+  , keystoneCatalogError :: Maybe String
 }
 
 type BenefitsScreenProps = {
@@ -3042,6 +3044,126 @@ type BenefitsScreenProps = {
 , glBannerClickable :: Boolean
 , nammaClubEnabled :: Boolean
 , nyClubConsent :: Maybe Boolean
+, isKeystoneCatalogLoading :: Boolean
+}
+
+type KeystoneProduct = {
+    id :: String
+  , name :: String
+  , slug :: String
+  , description :: String
+  , brand :: String
+  , sku :: String
+  , categoryId :: String
+  , defaultMrp :: String
+  , defaultSellingPrice :: String
+  , image :: String
+  , images :: Array String
+  , features :: Array String
+}
+
+type KeystoneCatalogResult = {
+    isSuccess :: Boolean
+  , error :: String
+  , products :: Array KeystoneProduct
+}
+
+type KeystoneCategory = {
+    id :: String
+  , name :: String
+  , slug :: String
+}
+
+type KeystoneCategoryResult = {
+    isSuccess :: Boolean
+  , error :: String
+  , categories :: Array KeystoneCategory
+}
+
+type KeystoneProductDetail = {
+    id :: String
+  , name :: String
+  , slug :: String
+  , brand :: String
+  , sku :: String
+  , categoryId :: String
+  , defaultMrp :: String
+  , defaultSellingPrice :: String
+  , description :: String
+  , images :: Array String
+  , features :: Array String
+}
+
+type KeystoneProductDetailResult = {
+    isSuccess :: Boolean
+  , error :: String
+  , product :: KeystoneProductDetail
+}
+
+type KeystoneCartItem = {
+    slug :: String
+  , name :: String
+  , brand :: String
+  , image :: String
+  , defaultMrp :: String
+  , defaultSellingPrice :: String
+  , quantity :: Int
+}
+
+type KeystoneStorefrontScreenState = {
+    data :: KeystoneStorefrontScreenData
+  , props :: KeystoneStorefrontScreenProps
+}
+
+type KeystoneStorefrontScreenData = {
+    products :: Array KeystoneProduct
+  , categories :: Array KeystoneCategory
+  , cart :: Array KeystoneCartItem
+  , catalogError :: Maybe String
+  , categoriesError :: Maybe String
+}
+
+type KeystoneStorefrontScreenProps = {
+    isProductsLoading :: Boolean
+  , isCategoriesLoading :: Boolean
+  , searchQuery :: String
+  , activeCategoryId :: String
+  , activeTab :: String
+  , productPage :: Int
+  , pageSize :: Int
+  , hasMoreProducts :: Boolean
+  , isLoadingMore :: Boolean
+  , searchSeq :: Int
+}
+
+type KeystoneProductDetailScreenState = {
+    data :: KeystoneProductDetailScreenData
+  , props :: KeystoneProductDetailScreenProps
+}
+
+type KeystoneProductDetailScreenData = {
+    slug :: String
+  , product :: Maybe KeystoneProductDetail
+  , cart :: Array KeystoneCartItem
+  , error :: Maybe String
+}
+
+type KeystoneProductDetailScreenProps = {
+    isLoading :: Boolean
+  , quantity :: Int
+}
+
+type KeystoneCartScreenState = {
+    data :: KeystoneCartScreenData
+  , props :: KeystoneCartScreenProps
+}
+
+type KeystoneCartScreenData = {
+    cart :: Array KeystoneCartItem
+}
+
+type KeystoneCartScreenProps = {
+    showOrderPlacedPopup :: Boolean
 }
 
 type LmsModuleList =

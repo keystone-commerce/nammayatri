@@ -55,6 +55,15 @@ data IffcoTokioConfig = IffcoTokioConfig
   deriving (Eq, Generic, Show)
   deriving anyclass (FromJSON, ToJSON)
 
+data KeystoneCommerceConfig = KeystoneCommerceConfig
+  { url :: BaseUrl,
+    apiKey :: EncryptedField 'AsEncrypted Text,
+    enabled :: Bool,
+    source :: Maybe Text
+  }
+  deriving (Eq, Generic, Show)
+  deriving anyclass (FromJSON, ToJSON)
+
 data InsuranceProvider = IffcoTokio
   deriving stock (Eq, Ord, Show, Read, Generic)
   deriving anyclass (FromJSON, ToJSON)
@@ -64,6 +73,10 @@ data PartnerSdkProvider = Aarokya
   deriving anyclass (FromJSON, ToJSON)
 
 data SAPProvider = Journal
+  deriving stock (Eq, Ord, Show, Read, Generic)
+  deriving anyclass (FromJSON, ToJSON)
+
+data CommerceProvider = KeystoneCommerce
   deriving stock (Eq, Ord, Show, Read, Generic)
   deriving anyclass (FromJSON, ToJSON)
 
@@ -98,6 +111,7 @@ data ServiceName
   | GSTEInvoiceService GSTEInvoice.GSTEInvoiceService
   | AirportReachargeService Payment.PaymentService
   | ChallanSearchService ChallanSearch.ChallanSearchService
+  | CommerceService CommerceProvider
   deriving stock (Eq, Ord, Generic)
   deriving anyclass (FromJSON, ToJSON)
 
@@ -134,6 +148,7 @@ instance Show ServiceName where
   show (GSTEInvoiceService s) = "GSTEInvoice_" <> show s
   show (AirportReachargeService s) = "AirportReacharge_" <> show s
   show (ChallanSearchService s) = "ChallanSearch_" <> show s
+  show (CommerceService s) = "Commerce_" <> show s
 
 instance Read ServiceName where
   readsPrec d' =
@@ -260,6 +275,10 @@ instance Read ServiceName where
                  | r1 <- stripPrefix "ChallanSearch_" r,
                    (v1, r2) <- readsPrec (app_prec + 1) r1
                ]
+            ++ [ (CommerceService v1, r2)
+                 | r1 <- stripPrefix "Commerce_" r,
+                   (v1, r2) <- readsPrec (app_prec + 1) r1
+               ]
       )
     where
       app_prec = 10
@@ -296,6 +315,7 @@ data ServiceConfigD (s :: UsageSafety)
   | GSTEInvoiceServiceConfig !GSTEInvoice.GSTEInvoiceConfig
   | AirportReachargeServiceConfig !PaymentServiceConfig
   | ChallanSearchServiceConfig !ChallanSearchInterface.ChallanSearchServiceConfig
+  | CommerceServiceConfig !KeystoneCommerceConfig
   deriving (Generic, Eq, Show)
 
 type ServiceConfig = ServiceConfigD 'Safe

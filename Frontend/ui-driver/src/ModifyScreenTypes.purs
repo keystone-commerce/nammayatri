@@ -89,6 +89,9 @@ modifyScreenState st =
     MeterScreenStateType a -> modifyState (\(GlobalState state) -> GlobalState $ state {meterScreen = a state.meterScreen})
     MeterRideScreenStateType a -> modifyState (\(GlobalState state) -> GlobalState $ state {meterRideScreen = a state.meterRideScreen})
     ExtraChargeInfoScreenStateType a -> modifyState (\(GlobalState state) -> GlobalState $ state {extraChargeInfoScreen = a state.extraChargeInfoScreen})
+    KeystoneStorefrontScreenStateType a -> modifyState (\(GlobalState state) -> GlobalState $ state {keystoneStorefrontScreen = a state.keystoneStorefrontScreen})
+    KeystoneProductDetailScreenStateType a -> modifyState (\(GlobalState state) -> GlobalState $ state {keystoneProductDetailScreen = a state.keystoneProductDetailScreen})
+    KeystoneCartScreenStateType a -> modifyState (\(GlobalState state) -> GlobalState $ state {keystoneCartScreen = a state.keystoneCartScreen})
 
 updateStage :: ScreenStage -> FlowBT String Unit
 updateStage stage = do

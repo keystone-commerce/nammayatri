@@ -112,6 +112,21 @@ referDriver dummyString = (getBaseUrl "") <> "/driver/referral"
 getstatsInfo :: String -> String
 getstatsInfo day = (getBaseUrl "") <> "/driver/profile/stats?day="<> day
 
+keystoneCategories :: String -> String
+keystoneCategories _ = (getBaseUrl "") <> "/driver/keystone/categories"
+
+keystoneProducts :: String -> String -> Int -> Int -> String
+keystoneProducts search categoryId page limit =
+  (getBaseUrl "") <> "/driver/keystone/products?page=" <> show page <> "&limit=" <> show limit <> "&sortBy=createdAt&sortOrder=desc"
+    <> optionalQuery "search" search
+    <> optionalQuery "categoryId" categoryId
+
+keystoneProductDetail :: String -> String
+keystoneProductDetail slug = (getBaseUrl "") <> "/driver/keystone/product/" <> slug
+
+optionalQuery :: String -> String -> String
+optionalQuery key value = if value == "" then "" else "&" <> key <> "=" <> value
+
 driverArrived :: String -> String
 driverArrived rideId = (getBaseUrl "") <> "/driver/ride/" <> rideId <> "/arrived/pickup"
 

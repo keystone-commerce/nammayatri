@@ -1,7 +1,4 @@
-const JBridge = window.JBridge;
-
 let fibers = [];
-const isDebug =  JSON.parse(JBridge.getDeviceInfo()).package_name.includes(".debug") || JSON.parse(JBridge.getDeviceInfo()).package_name.includes(".staging")
 export const getFromWindow = function (key,nothing,just) {
   if (typeof window[key] !== "undefined") {
     return just(window[key]);
@@ -44,17 +41,7 @@ export const stringifyJSON = function (obj) {
   return result;
 }
 
-export const toastWithLog = function (str) {
-  const JOSFlags = window.JOS.getJOSflags()
-  if (JOSFlags.isCUGUser || isDebug) {
-    if (window.__OS == "IOS") {
-      // window.JBridge.toast(str); //remove once toast is fixed in iOS.
-    } else {
-      window.JBridge.toast(str);
-    }
-  }
-  console.error(str);
-};
+export const toastWithLog = function (_str) {};
 
 export const unsafeSetForeign = function (key,obj,value) {
   if (typeof obj === "string") {

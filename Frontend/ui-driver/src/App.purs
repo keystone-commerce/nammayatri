@@ -90,6 +90,9 @@ import Screens.MeterScreen.ScreenData as MeterScreenData
 import Screens.MeterRideScreen.ScreenData as MeterRideScreenDataimport
 import Screens.ExtraChargeInfoScreen.ScreenData as ExtraChargeInfoScreenState
 import Screens.MeterRideScreen.ScreenData as MeterRideScreenData
+import Screens.KeystoneStorefrontScreen.ScreenData as KeystoneStorefrontScreenData
+import Screens.KeystoneProductDetailScreen.ScreenData as KeystoneProductDetailScreenData
+import Screens.KeystoneCartScreen.ScreenData as KeystoneCartScreenData
 
 type FlowBT e a = BackT (ExceptT e (Free (FlowWrapper GlobalState))) a
 
@@ -157,6 +160,9 @@ newtype GlobalState = GlobalState {
   , meterScreen :: MeterScreenState
   , meterRideScreen :: MeterRideScreenState
   , extraChargeInfoScreen :: ExtraChargeInfoScreenState.ExtraChargeInfoScreenState
+  , keystoneStorefrontScreen :: KeystoneStorefrontScreenState
+  , keystoneProductDetailScreen :: KeystoneProductDetailScreenState
+  , keystoneCartScreen :: KeystoneCartScreenState
   }
 
 defaultGlobalState :: GlobalState
@@ -224,6 +230,9 @@ defaultGlobalState = GlobalState {
 , meterScreen: MeterScreenData.initData
 , meterRideScreen: MeterRideScreenData.initData
 , extraChargeInfoScreen : ExtraChargeInfoScreenState.initData
+, keystoneStorefrontScreen : KeystoneStorefrontScreenData.initData
+, keystoneProductDetailScreen : KeystoneProductDetailScreenData.initData
+, keystoneCartScreen : KeystoneCartScreenData.initData
 }
 
 defaultGlobalProps :: GlobalProps
@@ -301,6 +310,9 @@ data ScreenType =
   | MeterScreenStateType (MeterScreenState -> MeterScreenState)
   | MeterRideScreenStateType (MeterRideScreenState -> MeterRideScreenState)
   | ExtraChargeInfoScreenStateType (ExtraChargeInfoScreenState.ExtraChargeInfoScreenState ->ExtraChargeInfoScreenState.ExtraChargeInfoScreenState)
+  | KeystoneStorefrontScreenStateType (KeystoneStorefrontScreenState -> KeystoneStorefrontScreenState)
+  | KeystoneProductDetailScreenStateType (KeystoneProductDetailScreenState -> KeystoneProductDetailScreenState)
+  | KeystoneCartScreenStateType (KeystoneCartScreenState -> KeystoneCartScreenState)
 
 data ScreenStage = HomeScreenStage HomeScreenStage
 
@@ -632,6 +644,15 @@ data BENEFITS_SCREEN_OUTPUT = DRIVER_REFERRAL_SCREEN_NAV NAVIGATION_ACTIONS
                               | GO_TO_LMS_VIDEO_SCREEN BenefitsScreenState
                               | CUSTOMER_REFERRAL_TRACKER_NAV Boolean
                               | GO_TO_DRIVER_CLAIM_REWARD_SCREEN BenefitsScreenState
+                              | GO_TO_KEYSTONE_STOREFRONT BenefitsScreenState
+
+data KEYSTONE_STOREFRONT_SCREEN_OUTPUT = GO_TO_KEYSTONE_PRODUCT_DETAIL KeystoneProduct KeystoneStorefrontScreenState
+                                       | GO_TO_KEYSTONE_CART_FROM_STOREFRONT KeystoneStorefrontScreenState
+
+data KEYSTONE_PRODUCT_DETAIL_SCREEN_OUTPUT = GO_TO_KEYSTONE_CART_FROM_DETAIL KeystoneProductDetailScreenState
+                                         | GO_TO_KEYSTONE_STOREFRONT_FROM_DETAIL String
+
+data KEYSTONE_CART_SCREEN_OUTPUT = GO_TO_KEYSTONE_STOREFRONT_FROM_CART String
 
 data LMS_VIDEO_SCREEN_OUTPUT = GO_TO_QUIZ_SCREEN LmsVideoScreenState | REFRESH_LMS_VIDEO_SCREEN LmsVideoScreenState | GO_TO_BENEFITS_SCREEN | SELECT_LANGUAGE_FOR_VIDEOS LmsVideoScreenState
 

@@ -185,6 +185,7 @@ data KeyStore = USER_NAME
                 | NY_CLUB_POPUP_SHOWN
                 | NY_CLUB_POPUP_DECLINED_COUNT
                 | PET_RIDES_INFO_POPUP_SHOWN
+                | KEYSTONE_CART
 
 derive instance genericKeyStore :: Generic KeyStore _
 instance showKeyStore :: Show KeyStore where

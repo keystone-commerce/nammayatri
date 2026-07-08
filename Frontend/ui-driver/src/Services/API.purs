@@ -2209,6 +2209,114 @@ instance showCurrentDateAndTimeRes :: Show CurrentDateAndTimeRes where show = ge
 instance decodeCurrentDateAndTimeRes :: Decode CurrentDateAndTimeRes  where decode = defaultDecode
 instance encodeCurrentDateAndTimeRes :: Encode CurrentDateAndTimeRes where encode = defaultEncode
 
+------------------------------------------ keystone catalog --------------------------------------
+
+type APIKeystoneProduct =
+  { id :: String
+  , name :: String
+  , slug :: String
+  , description :: String
+  , brand :: String
+  , sku :: String
+  , categoryId :: String
+  , defaultMrp :: String
+  , defaultSellingPrice :: String
+  , image :: String
+  , images :: Array String
+  , features :: Array String
+  }
+
+type APIKeystoneCategory =
+  { id :: String
+  , name :: String
+  , slug :: String
+  }
+
+type APIKeystoneProductDetail =
+  { id :: String
+  , name :: String
+  , slug :: String
+  , brand :: String
+  , sku :: String
+  , categoryId :: String
+  , defaultMrp :: String
+  , defaultSellingPrice :: String
+  , description :: String
+  , images :: Array String
+  , features :: Array String
+  }
+
+data KeystoneProductsReq = KeystoneProductsReq String String Int Int
+
+newtype KeystoneProductListRes = KeystoneProductListRes
+  { products :: Array APIKeystoneProduct
+  }
+
+instance makeKeystoneProductsReq :: RestEndpoint KeystoneProductsReq where
+  makeRequest reqBody@(KeystoneProductsReq search categoryId page limit) headers = defaultMakeRequestWithoutLogs GET (EP.keystoneProducts search categoryId page limit) headers reqBody Nothing
+  encodeRequest req = standardEncode req
+
+derive instance genericKeystoneProductsReq :: Generic KeystoneProductsReq _
+instance standardEncodeKeystoneProductsReq :: StandardEncode KeystoneProductsReq where standardEncode (KeystoneProductsReq search categoryId page limit) = standardEncode { search : search, categoryId : categoryId, page : page, limit : limit }
+instance showKeystoneProductsReq :: Show KeystoneProductsReq where show = genericShow
+instance decodeKeystoneProductsReq :: Decode KeystoneProductsReq where decode = defaultDecode
+instance encodeKeystoneProductsReq :: Encode KeystoneProductsReq where encode = defaultEncode
+
+derive instance genericKeystoneProductListRes :: Generic KeystoneProductListRes _
+derive instance newtypeKeystoneProductListRes :: Newtype KeystoneProductListRes _
+instance standardEncodeKeystoneProductListRes :: StandardEncode KeystoneProductListRes where standardEncode (KeystoneProductListRes res) = standardEncode res
+instance showKeystoneProductListRes :: Show KeystoneProductListRes where show = genericShow
+instance decodeKeystoneProductListRes :: Decode KeystoneProductListRes where decode = defaultDecode
+instance encodeKeystoneProductListRes :: Encode KeystoneProductListRes where encode = defaultEncode
+
+newtype KeystoneCategoriesReq = KeystoneCategoriesReq String
+
+newtype KeystoneCategoryListRes = KeystoneCategoryListRes
+  { categories :: Array APIKeystoneCategory
+  }
+
+instance makeKeystoneCategoriesReq :: RestEndpoint KeystoneCategoriesReq where
+  makeRequest reqBody headers = defaultMakeRequestWithoutLogs GET (EP.keystoneCategories "") headers reqBody Nothing
+  encodeRequest req = standardEncode req
+
+derive instance genericKeystoneCategoriesReq :: Generic KeystoneCategoriesReq _
+derive instance newtypeKeystoneCategoriesReq :: Newtype KeystoneCategoriesReq _
+instance standardEncodeKeystoneCategoriesReq :: StandardEncode KeystoneCategoriesReq where standardEncode (KeystoneCategoriesReq reqBody) = standardEncode reqBody
+instance showKeystoneCategoriesReq :: Show KeystoneCategoriesReq where show = genericShow
+instance decodeKeystoneCategoriesReq :: Decode KeystoneCategoriesReq where decode = defaultDecode
+instance encodeKeystoneCategoriesReq :: Encode KeystoneCategoriesReq where encode = defaultEncode
+
+derive instance genericKeystoneCategoryListRes :: Generic KeystoneCategoryListRes _
+derive instance newtypeKeystoneCategoryListRes :: Newtype KeystoneCategoryListRes _
+instance standardEncodeKeystoneCategoryListRes :: StandardEncode KeystoneCategoryListRes where standardEncode (KeystoneCategoryListRes res) = standardEncode res
+instance showKeystoneCategoryListRes :: Show KeystoneCategoryListRes where show = genericShow
+instance decodeKeystoneCategoryListRes :: Decode KeystoneCategoryListRes where decode = defaultDecode
+instance encodeKeystoneCategoryListRes :: Encode KeystoneCategoryListRes where encode = defaultEncode
+
+newtype KeystoneProductDetailReq = KeystoneProductDetailReq String
+
+newtype KeystoneProductDetailRes = KeystoneProductDetailRes
+  { productDetail :: APIKeystoneProductDetail
+  }
+
+instance makeKeystoneProductDetailReq :: RestEndpoint KeystoneProductDetailReq where
+  makeRequest reqBody@(KeystoneProductDetailReq slug) headers = defaultMakeRequestWithoutLogs GET (EP.keystoneProductDetail slug) headers reqBody Nothing
+  encodeRequest req = standardEncode req
+
+derive instance genericKeystoneProductDetailReq :: Generic KeystoneProductDetailReq _
+derive instance newtypeKeystoneProductDetailReq :: Newtype KeystoneProductDetailReq _
+instance standardEncodeKeystoneProductDetailReq :: StandardEncode KeystoneProductDetailReq where standardEncode (KeystoneProductDetailReq reqBody) = standardEncode reqBody
+instance showKeystoneProductDetailReq :: Show KeystoneProductDetailReq where show = genericShow
+instance decodeKeystoneProductDetailReq :: Decode KeystoneProductDetailReq where decode = defaultDecode
+instance encodeKeystoneProductDetailReq :: Encode KeystoneProductDetailReq where encode = defaultEncode
+
+derive instance genericKeystoneProductDetailRes :: Generic KeystoneProductDetailRes _
+derive instance newtypeKeystoneProductDetailRes :: Newtype KeystoneProductDetailRes _
+instance standardEncodeKeystoneProductDetailRes :: StandardEncode KeystoneProductDetailRes where standardEncode (KeystoneProductDetailRes res) = standardEncode res
+instance showKeystoneProductDetailRes :: Show KeystoneProductDetailRes where show = genericShow
+instance decodeKeystoneProductDetailRes :: Decode KeystoneProductDetailRes where decode = defaultDecode
+instance encodeKeystoneProductDetailRes :: Encode KeystoneProductDetailRes where encode = defaultEncode
+
 ------------------------------------------------------------------------autoComplete-------------------------------------------------------------------------------
 
 newtype AutoCompleteReq = AutoCompleteReq {

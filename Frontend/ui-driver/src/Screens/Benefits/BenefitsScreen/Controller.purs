@@ -43,6 +43,7 @@ import PrestoDOM.Core (processEvent)
 import Data.Function.Uncurried (runFn2)
 import Engineering.Helpers.Commons as EHC
 import Engineering.Helpers.Utils as EHU
+import Screens.Types (KeystoneCatalogResult)
 
 instance showAction :: Show Action where
   show (BackPressed) = "BackPressed"
@@ -75,6 +76,8 @@ instance showAction :: Show Action where
   show (UpdateReferralCode _) = "UpdateReferralCode"
   show (GoToClaimReward) = "GoToClaimReward"
   show (YoutubeVideoStatus _) = "YoutubeVideoStatus"
+  show (UpdateKeystoneCatalog _) = "UpdateKeystoneCatalog"
+  show GoToKeystoneStorefront = "GoToKeystoneStorefront"
 instance loggableAction :: Loggable Action where
   performLog action appId = case action of
     AfterRender -> trackAppScreenRender appId "screen" "BenefitsScreen"
@@ -138,6 +141,8 @@ data Action = BackPressed
             | UpdateReferralCode GenerateReferralCodeRes
             | GoToClaimReward
             | YoutubeVideoStatus String
+            | UpdateKeystoneCatalog KeystoneCatalogResult
+            | GoToKeystoneStorefront
 data ScreenOutput = GoToHomeScreen BenefitsScreenState
                   | GoToNotifications BenefitsScreenState
                   | SubscriptionScreen BenefitsScreenState
@@ -147,6 +152,7 @@ data ScreenOutput = GoToHomeScreen BenefitsScreenState
                   | GoToLmsVideoScreen BenefitsScreenState
                   | GoToCustomerReferralTrackerScreen Boolean BenefitsScreenState
                   | GoToDriverClaimRewardScreen BenefitsScreenState
+                  | GoToKeystoneStorefrontScreen BenefitsScreenState
 
 eval :: Action -> BenefitsScreenState -> Eval Action ScreenOutput BenefitsScreenState
 
@@ -158,6 +164,24 @@ eval BackPressed state =
   else exit $ GoToHomeScreen state
 
 eval (GoToCustomerReferralTracker openPP) state = exit $ GoToCustomerReferralTrackerScreen openPP state
+
+eval (UpdateKeystoneCatalog result) state =
+  if result.isSuccess then
+    continue state
+      { data
+        { keystoneProducts = result.products
+        , keystoneCatalogError = Nothing
+        }
+      , props { isKeystoneCatalogLoading = false }
+      }
+  else
+    continue state
+      { data
+        { keystoneProducts = []
+        , keystoneCatalogError = Just result.error
+        }
+      , props { isKeystoneCatalogLoading = false }
+      }
 
 eval (GenericHeaderActionController (GenericHeader.PrefixImgOnClick)) state = exit $ GoBack
 
@@ -289,7 +313,9 @@ eval (BannerCarousal (BannerCarousel.OnClick index)) state =
 eval GullakBannerClick state = continue state { props { glBannerClickable = false}}
 
 eval GoToClaimReward state = exit $ GoToDriverClaimRewardScreen state
-  
+
+eval GoToKeystoneStorefront state = exit $ GoToKeystoneStorefrontScreen state
+
 eval _ state = update state
 
 shareImageMessageConfig :: BenefitsScreenState -> ShareImageConfig

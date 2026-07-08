@@ -35,6 +35,7 @@ import qualified API.Action.UI.FinanceInvoice as FinanceInvoice
 import qualified API.Action.UI.FleetOwnerList as FleetOwnerList
 import qualified API.Action.UI.Insurance as Insurance
 import qualified API.Action.UI.Invoice as Invoice
+import qualified API.Action.UI.KeystoneCatalog as KeystoneCatalog
 import qualified API.Action.UI.LmsModule as LmsModule
 import qualified API.Action.UI.Merchant as Merchant
 import qualified API.Action.UI.MerchantDocument as MerchantDocument
@@ -165,6 +166,7 @@ type API =
            :<|> CallFeedback.API
            :<|> Invoice.API
            :<|> Insurance.API
+           :<|> KeystoneCatalog.API
            :<|> DriverInsurance.API
            :<|> DriverWallet.API
            :<|> SubscriptionTransaction.API
@@ -241,6 +243,7 @@ handler =
     :<|> CallFeedback.handler
     :<|> Invoice.handler
     :<|> Insurance.handler
+    :<|> KeystoneCatalog.handler
     :<|> DriverInsurance.handler
     :<|> DriverWallet.handler
     :<|> SubscriptionTransaction.handler
